@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "lookback_hours": 24,
+  "ignore_authors": [
+    "dependabot[bot]",
+    "github-actions[bot]",
+    "renovate[bot]"
+  ],
+  "repos": [
+    { "owner": "your-org", "name": "game-alpha", "alias": "Alpha" },
+    { "owner": "your-org", "name": "game-beta",  "alias": "Beta" },
+    { "owner": "your-org", "name": "client-x",   "alias": "ClientX" }
+  ],
+  "recipients": [
+    {
+      "name": "lead",
+      "webhook_env": "DISCORD_WEBHOOK_LEAD",
+      "scope": "all_projects"
+    },
+    {
+      "name": "ahmet",
+      "webhook_env": "DISCORD_WEBHOOK_AHMET",
+      "scope": "own_commits",
+      "github_username": "ahmetdev"
+    },
+    {
+      "name": "team_channel",
+      "webhook_env": "DISCORD_WEBHOOK_TEAM",
+      "scope": "summary_only"
+    }
+  ],
+  "unity_options": {
+    "filter_meta_only_commits": true,
+    "include_scene_summaries": true,
+    "binary_asset_extensions": [".png", ".jpg", ".tga", ".psd", ".fbx", ".obj", ".blend", ".wav", ".ogg", ".mp3"]
+  }
+}

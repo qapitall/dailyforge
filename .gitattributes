@@ -1,0 +1,41 @@
+# Default: let git decide and normalize to LF on commit
+* text=auto eol=lf
+
+# Explicitly LF for shell scripts and POSIX-only assets — the skill assumes bash
+*.sh        text eol=lf
+*.bash      text eol=lf
+
+# Markdown and config — LF
+*.md        text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+*.json      text eol=lf
+*.toml      text eol=lf
+
+# Source (when v0.2 CLI lands)
+*.ts        text eol=lf
+*.tsx       text eol=lf
+*.js        text eol=lf
+*.mjs       text eol=lf
+*.cjs       text eol=lf
+
+# Windows-only files keep CRLF
+*.bat       text eol=crlf
+*.cmd       text eol=crlf
+*.ps1       text eol=crlf
+
+# Binary — never normalize
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.gif       binary
+*.webp      binary
+*.ico       binary
+*.pdf       binary
+*.zip       binary
+*.gz        binary
+
+# GitHub linguist hints — keep prompts/docs out of language stats
+prompts/**       linguist-documentation
+docs/**          linguist-documentation
+*.example.json   linguist-generated

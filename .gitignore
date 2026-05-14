@@ -1,0 +1,33 @@
+# Secrets
+.env
+.env.local
+.env.*.local
+
+# Active config (use config.example.json as the committed template)
+config.json
+
+# Node.js (for v0.2 CLI)
+node_modules/
+dist/
+build/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Local cache / scratch
+.cache/
+.tmp/

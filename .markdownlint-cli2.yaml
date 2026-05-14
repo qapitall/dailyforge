@@ -1,0 +1,18 @@
+config:
+  # Allow long lines — prose, code blocks, and tables shouldn't be forced to wrap
+  MD013: false
+  # Allow inline HTML (we use <!-- comments --> for screenshot placeholders)
+  MD033: false
+  # Don't require first line to be a top-level heading (some files start with frontmatter)
+  MD041: false
+  # Allow duplicate headings in different sections
+  MD024:
+    siblings_only: true
+
+globs:
+  - "**/*.md"
+
+ignores:
+  - "node_modules/**"
+  - ".github/PULL_REQUEST_TEMPLATE.md"
+  - ".github/ISSUE_TEMPLATE/**"
