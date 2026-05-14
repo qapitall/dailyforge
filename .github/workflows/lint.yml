@@ -18,7 +18,6 @@ jobs:
           args: >-
             --no-progress
             --max-concurrency 4
-            --exclude-mail
             --exclude '^https://discord.com/api/webhooks/'
             './**/*.md'
           fail: true

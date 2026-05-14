@@ -8,6 +8,14 @@ config:
   # Allow duplicate headings in different sections
   MD024:
     siblings_only: true
+  # Don't enforce blank lines around headings — prose flow is fine
+  MD022: false
+  # Don't enforce blank lines around lists
+  MD032: false
+  # Don't enforce blank lines around fenced code blocks
+  MD031: false
+  # Don't require a language tag on every fenced code block (we use plain ``` for ASCII art and example output)
+  MD040: false
 
 globs:
   - "**/*.md"
