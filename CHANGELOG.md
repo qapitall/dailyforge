@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Multi-provider support — `provider` field in `config.json` selects `github`, `gitlab`, or `gitea`
+- GitLab REST API v4 backend: PAT auth (`GITLAB_TOKEN`), URL-encoded project paths, `X-Next-Page` pagination
+- Gitea REST API v1 backend: token auth (`GITEA_TOKEN`), inline commit-file lists
+- `host` field in `config.json` for self-hosted GitLab / Gitea instances
+- Provider Adapters section in `SKILL.md` — one fetch path per provider, shared classifier and delivery
+- Step 0 preflight `doctor` — verifies tools, auth, and repo reachability in a single pass before reporting
+- Provider-specific `own_commits` identity keys: `github_username`, `gitlab_username` / `email`, `gitea_username`
+- Configurable report output language — `report_language` field in `config.json` plus a `--lang` runtime override on `/dailyforge`; report text was English-only before
+
+### Changed
+- `.env` now carries the provider API token (GitLab/Gitea) alongside the Discord webhook URLs
+- Prerequisite checks are provider-aware — `gh` is required only when `provider` is `github`
+- README, QUICKSTART, ARCHITECTURE, ROADMAP, and SECURITY updated for the three-provider model
+- Roadmap restructured: the planned standalone CLI was dropped; v0.2 is now multi-provider support
+
+### Fixed
+- Timestamp math uses timezone-aware UTC (`datetime.now(timezone.utc)`) — avoids the Python 3.12+ `utcnow()` deprecation warning leaking into shell output
+- Large GitLab/Gitea API responses are read from a temp file instead of a shell variable — avoids `jq` control-character parse errors on multi-line commit messages
+- Commit-diff fetch is paginated — file lists for commits touching 100+ files are no longer silently truncated
+
 ## [0.1.0] — 2026-05-14
 
 Initial public release. Skill-mode only — CLI mode is planned for v0.2.

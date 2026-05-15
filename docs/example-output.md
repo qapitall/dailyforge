@@ -85,4 +85,4 @@ Quiet across the board. No commits in the window.
 - Right after a release when everyone is on rest/decompression
 - When `lookback_hours` is too short relative to your team's commit cadence — try bumping it to `48` or `72` in `config.json` and re-running
 
-DailyForge never invents activity. If `gh api` returns no commits in the window, the report says so.
+DailyForge never invents activity. If the provider's API returns no commits in the window, the report says so.

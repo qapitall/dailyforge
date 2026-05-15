@@ -1,0 +1,5 @@
+# Placeholder / template hostnames used in the skill and docs — not real endpoints.
+# Matched as regex against extracted URLs.
+HOST
+your-gitlab-host
+your-gitea-host

@@ -1,6 +1,6 @@
 # Security Policy
 
-DailyForge handles data that can be sensitive: webhook URLs, OAuth-scoped GitHub access via `gh`, and commit metadata describing developer activity. This document covers how to report vulnerabilities, what the project considers in scope, and operator obligations under data-protection law.
+DailyForge handles data that can be sensitive: webhook URLs, git-provider API access (the `gh` CLI for GitHub, or a Personal Access Token for GitLab / Gitea), and commit metadata describing developer activity. This document covers how to report vulnerabilities, what the project considers in scope, and operator obligations under data-protection law.
 
 ## Reporting a vulnerability
 
@@ -32,8 +32,13 @@ You will receive an acknowledgement within **72 hours**. If a fix is needed, exp
 
 DailyForge's attack surface is small but real. The project takes these concerns seriously:
 
-### 1. Webhook URL leakage
-Discord webhook URLs grant write access to a specific channel. They live in `.env`, which is excluded by `.gitignore`. **If a webhook URL is leaked**, rotate it in Discord immediately (delete + recreate). The skill loads `.env` via `set -a; . ./.env; set +a` — make sure your repo never contains a real `.env`.
+### 1. `.env` secret leakage
+`.env` holds two classes of secret: Discord webhook URLs and — for GitLab/Gitea — a
+provider API token. It is excluded by `.gitignore`; make sure your repo never contains a
+real `.env`. The skill loads it via `set -a; . ./.env; set +a`.
+- **If a webhook URL is leaked**, rotate it in Discord immediately (delete + recreate).
+- **If a `GITLAB_TOKEN` / `GITEA_TOKEN` is leaked**, revoke it in the provider's token
+  settings immediately and issue a new one.
 
 ### 2. Prompt injection via commit messages
 Commit messages and file paths are passed into Claude as part of the report-generation prompt. A malicious commit could attempt to:
@@ -48,8 +53,17 @@ Commit messages and file paths are passed into Claude as part of the report-gene
 
 **Residual risk:** narrative tampering is still possible. A team member with commit access can shape how their work is described. This is acceptable for v0.1's threat model, which assumes commit authors are trusted teammates, not adversaries.
 
-### 3. `gh` token scope
-The skill calls `gh api` against the GitHub repos in `config.json`. Authenticate `gh` with **read-only scope** on those repos. DailyForge never needs `write`, `delete`, or `admin` permissions. If `gh auth login` was run with broader scopes, consider creating a dedicated machine user with `repo:read` only.
+### 3. Provider token scope
+DailyForge only ever **reads** commit metadata. Grant it the least privilege each
+provider allows:
+- **GitHub:** authenticate `gh` with read-only scope on the configured repos. If
+  `gh auth login` was run with broader scopes, consider a dedicated machine user with
+  `repo:read` only.
+- **GitLab:** the Personal Access Token needs `read_api` + `read_repository` and nothing
+  else. Do not grant `api`, `write_repository`, or admin scopes.
+- **Gitea:** the access token needs read-only repository access only.
+
+DailyForge never needs `write`, `delete`, or `admin` permissions on any provider.
 
 ### 4. Discord embed escape
 Commit data is wrapped into a JSON body via `jq -n --arg`, which handles escaping correctly. Do not bypass `jq` — never inline commit data into the curl payload directly.
@@ -59,13 +73,13 @@ Some hosts (CI runners, shared terminals) may log shell commands. Avoid running 
 
 ## Out of scope
 
-- Vulnerabilities in `gh`, `jq`, `curl`, Python, or Claude Code itself — report those upstream
+- Vulnerabilities in `gh`, `jq`, `curl`, Python, GitLab, Gitea, or Claude Code itself — report those upstream
 - Social-engineering scenarios where a maintainer of the host repo deliberately exfiltrates data — DailyForge is open source and operates on trust, not enforcement
-- Self-inflicted issues (committing `.env`, giving `gh` admin scopes intentionally) — these are configuration mistakes, not vulnerabilities
+- Self-inflicted issues (committing `.env`, giving a provider token admin scopes intentionally) — these are configuration mistakes, not vulnerabilities
 
 ## Operator obligations (data protection)
 
-DailyForge processes data about identified people: commit authors, GitHub usernames, work activity. If you operate it inside an organization, **you are the data controller**. Local data-protection law applies, including but not limited to:
+DailyForge processes data about identified people: commit authors, usernames and email addresses, work activity. If you operate it inside an organization, **you are the data controller**. Local data-protection law applies, including but not limited to:
 
 - **Türkiye:** KVKK (6698 sayılı Kişisel Verilerin Korunması Kanunu)
 - **EU / EEA:** GDPR (Regulation 2016/679)
@@ -81,7 +95,7 @@ Before deploying, send a written notice to every developer whose commits will be
 You — not DailyForge — choose the lawful basis (legitimate interest, contract, consent, etc.) and document it. Employment-context monitoring typically relies on legitimate interest plus a documented balancing test. In Türkiye specifically, employee personal-data processing under KVKK has narrow lawful bases — review them before deploying.
 
 ### Data minimization
-DailyForge reads only commit author, message, file paths, and timestamps via `gh api` — the same data visible in `git log`. It does **not** read diff content, local filesystem, IDE state, or any other source. Don't add monitored repos "just in case."
+DailyForge reads only commit author, message, file paths, and timestamps via the git provider's API — the same data visible in `git log`. It does **not** read diff content, local filesystem, IDE state, or any other source. Don't add monitored repos "just in case."
 
 ### Purpose limitation
 Reports are designed for daily team-awareness, not performance review or HR decisions. README's "Anti-patterns to avoid" lists these explicitly. Using DailyForge output as input to a performance review likely changes the lawful basis, the disclosure obligations, and the risk profile.
@@ -102,8 +116,8 @@ Discord, GitHub, and Anthropic (Claude) are US-based services. Sending commit da
 
 Before deploying inside an organization:
 
-- [ ] `gh auth status` shows minimum-necessary scope (`repo:read` or similar)
-- [ ] `.env` is in `.gitignore` and never committed
+- [ ] Provider access is minimum-necessary scope — `gh auth status` shows `repo:read` (GitHub), or the GitLab/Gitea token is read-only
+- [ ] `.env` is in `.gitignore` and never committed (it holds the provider token + webhook URLs)
 - [ ] `config.json` only lists repos you actually need to monitor
 - [ ] `ANNOUNCE.md` has been shared with the team
 - [ ] You have written down your lawful basis and retention policy

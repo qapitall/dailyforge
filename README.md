@@ -7,7 +7,7 @@
 ![Built with Claude Code](https://img.shields.io/badge/built%20with-Claude%20Code-orange.svg)
 ![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)
 
-**Status:** v0.1 — Skill mode shipped. CLI mode (v0.2) is on the [roadmap](docs/ROADMAP.md).
+**Status:** v0.1 shipped (GitHub). v0.2 adds GitLab and Gitea support — see the [roadmap](docs/ROADMAP.md).
 
 See [`QUICKSTART.md`](QUICKSTART.md) to get running in 5 minutes, or [`docs/example-output.md`](docs/example-output.md) for sample reports.
 
@@ -33,16 +33,16 @@ If you lead a team where multiple developers work on multiple parallel Unity pro
 
 ## Solution
 
-A tool that pulls commit activity from the last 24 hours across multiple GitHub repositories, enriches it with Unity-specific context, runs it through Claude to produce a narrative summary, and posts daily reports to Discord webhooks.
+A tool that pulls commit activity from the last 24 hours across multiple repositories — on GitHub, self-hosted GitLab, or Gitea — enriches it with Unity-specific context, runs it through Claude to produce a narrative summary, and posts daily reports to Discord webhooks.
 
-It currently ships as a Claude Code Skill (`/dailyforge`) — zero setup, no API keys, no cron. A standalone CLI for automation (cron / GitHub Action) is on the [v0.2 roadmap](docs/ROADMAP.md).
+It ships as a Claude Code Skill (`/dailyforge`) — zero setup, no Claude API key, no cron. The git provider is a single config choice; see the [roadmap](docs/ROADMAP.md) for what's next.
 
 **Target user:** a team lead or tech lead managing multiple parallel Unity projects.
 
 **How it works:**
-1. Lead defines monitored GitHub repos and recipients in `config.json`
+1. Lead picks a `provider` (`github`, `gitlab`, or `gitea`) and defines monitored repos and recipients in `config.json`
 2. Opens Claude Code, types `/dailyforge`
-3. Claude fetches commits via `gh` CLI, classifies Unity files, and generates a tailored report per recipient scope
+3. Claude fetches commits via the provider's API, classifies Unity files, and generates a tailored report per recipient scope
 4. Each report is posted to the configured Discord webhook
 
 See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the design rationale and component diagram.
@@ -57,14 +57,14 @@ The core design choice: **the recipient list is fully under the lead's control.*
 
 1. **Inform your team in writing before deploying.** Every developer whose commits will be processed must be told, in advance, in a form they can retain. A proper notice covers at minimum:
    - Who is operating the tool (data controller, contact)
-   - What data is read — commit author, message, file paths, timestamps via `gh api`
+   - What data is read — commit author, message, file paths, timestamps via the git provider's API
    - What data is **not** read — local machine, IDE, chat, unpushed work
    - Where reports go — which Discord channels, who has access
    - Which third parties receive the data — GitHub, Discord, Anthropic (all US-based)
    - The lawful basis for processing and how long Discord retains the reports
    - How to raise a concern or request access / deletion of one's data
 
-2. **Reads only data already shared via git.** No local machine access, no IDE access, no screen recordings, no keystrokes. Everything is visible via a plain `gh api` call.
+2. **Reads only data already shared via git.** No local machine access, no IDE access, no screen recordings, no keystrokes. Everything is visible via a plain provider API call (`gh api`, GitLab REST v4, or Gitea REST v1).
 
 3. **Not a performance review tool.** No commit counts, no line counts, no leaderboards. Reports are narrative. Lines of code is a bad proxy and is excluded by design.
 
@@ -94,6 +94,10 @@ Config defines a `recipients` array:
 ]
 ```
 
+For `own_commits` recipients the identity key depends on the provider: `github_username`
+for GitHub, `gitea_username` for Gitea, and `email` (or `gitlab_username`) for GitLab —
+GitLab identifies commit authors by email.
+
 Three scopes:
 - `all_projects` — full report across every monitored repo (for the lead)
 - `own_commits` — only the developer's own commits, sent to them privately
@@ -101,18 +105,19 @@ Three scopes:
 
 ---
 
-## What's in v0.1
+## Features
 
 - Claude Code skill at `.claude/skills/dailyforge/SKILL.md`
-- Multi-repo commit collection via `gh api`
+- Multi-repo commit collection from GitHub, GitLab, or Gitea — selected by a single `provider` field in `config.json`
 - Unity-aware file classification (C#, scenes, prefabs, ScriptableObjects, shaders, materials, animations, textures, models, audio)
 - `.meta`-only commit filtering and rename detection
 - Narrative reports — no commit counts, no line counts, no leaderboards
 - Discord webhook delivery as rich embeds
 - Three recipient scopes: `all_projects`, `own_commits`, `summary_only`
+- Configurable report output language — `report_language` config field, with a `--lang` per-run override
 - `/dailyforge --dry-run` preview mode
 
-See [`docs/ROADMAP.md`](docs/ROADMAP.md) for what's coming in v0.2+.
+See [`docs/ROADMAP.md`](docs/ROADMAP.md) for what's coming next.
 
 ---
 
@@ -120,10 +125,10 @@ See [`docs/ROADMAP.md`](docs/ROADMAP.md) for what's coming in v0.2+.
 
 Copy and edit the example files at the repo root:
 
-- `config.example.json` → `config.json` — repos to monitor and recipients
-- `.env.example` → `.env` — Discord webhook URLs (never commit)
+- `config.example.json` → `config.json` — `provider`, `host`, repos to monitor, and recipients
+- `.env.example` → `.env` — provider API token + Discord webhook URLs (never commit)
 
-Required tools: `gh` (authenticated), `claude` (Pro or Max), `jq`, `python3`, `curl`. Full prerequisite checklist and OS-specific install commands in [`QUICKSTART.md`](QUICKSTART.md).
+Required tools: `claude` (Pro or Max), `jq`, `python3`, `curl`. The `gh` CLI (authenticated) is required only when `provider` is `github`; GitLab and Gitea use a read-only token in `.env` instead. Full prerequisite checklist and OS-specific install commands in [`QUICKSTART.md`](QUICKSTART.md).
 
 ---
 
@@ -191,7 +196,7 @@ dailyforge/
 
 ## Roadmap
 
-See [`docs/ROADMAP.md`](docs/ROADMAP.md) — v0.2 CLI mode, v0.3 auto-invoke, v0.4 GitLab/Slack/Bitbucket integrations.
+See [`docs/ROADMAP.md`](docs/ROADMAP.md) — v0.2 multi-provider (GitLab + Gitea), v0.3 auto-invoke, v0.4 Slack/Bitbucket integrations.
 
 ---
 

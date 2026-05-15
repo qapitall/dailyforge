@@ -85,6 +85,10 @@ If there are no anomalies, omit the section entirely.
 
 Target 200-400 words total. Built to be read with morning coffee.
 
+## Output language
+
+Write the report in the language the skill specifies (default English). Translate all section headings and narrative prose into that language; keep the markdown structure unchanged. Commit messages and file paths quoted from the repo are left as the author wrote them.
+
 ## Format
 
 Pure markdown. No HTML, no emojis, no decorative headers. Discord will render the markdown inside an embed.

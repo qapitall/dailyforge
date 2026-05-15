@@ -35,6 +35,10 @@ Write a 2-3 line summary at the highest level. No names, no project-by-project b
 
 20-60 words. This is a heartbeat, not a report.
 
+## Output language
+
+Write the heartbeat in the language the skill specifies (default English).
+
 ## Format
 
 Plain markdown.

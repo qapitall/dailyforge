@@ -5,21 +5,25 @@ Get DailyForge running in 5 minutes.
 ## Prerequisites
 
 - [ ] Claude Code installed (Pro or Max plan) — check with `claude --version`
-- [ ] `gh` CLI installed and authenticated — check with `gh auth status`
 - [ ] `jq` installed — check with `jq --version`
 - [ ] `python3` (or `python`) available — check with `python3 --version`
 - [ ] `curl` installed (already on most systems)
-- [ ] Read access to the GitHub repos you want to monitor
+- [ ] Read access to the repos you want to monitor
+- [ ] **GitHub only:** `gh` CLI installed and authenticated — check with `gh auth status`
+- [ ] **GitLab / Gitea:** a read-only API token (see Step 3)
 
 ### Install the CLI tools
 
 | OS | Command |
 |---|---|
-| macOS | `brew install gh jq python` |
-| Ubuntu / Debian | `sudo apt install gh jq python3 curl` |
-| Windows | `winget install GitHub.cli jqlang.jq Python.Python.3` |
+| macOS | `brew install jq python` (add `gh` for GitHub) |
+| Ubuntu / Debian | `sudo apt install jq python3 curl` (add `gh` for GitHub) |
+| Windows | `winget install jqlang.jq Python.Python.3` (add `GitHub.cli` for GitHub) |
 
-**Windows users:** DailyForge's shell logic is POSIX (`bash`). Run Claude Code from **Git Bash** or **WSL**, not PowerShell — `gh`, `jq`, and the skill's shell snippets all assume a bash environment. Authenticate `gh` once with `gh auth login` from the same shell.
+**Windows users:** DailyForge's shell logic is POSIX (`bash`). Run Claude Code from
+**Git Bash** or **WSL**, not PowerShell — `jq`, `curl`, and the skill's shell snippets
+all assume a bash environment. If you use GitHub, authenticate `gh` once with
+`gh auth login` from the same shell.
 
 ## Step 1: Clone
 
@@ -36,10 +40,33 @@ $EDITOR config.json
 ```
 
 Edit:
-- `repos`: the repos you want to monitor (owner/name/alias)
+- `provider`: `github`, `gitlab`, or `gitea`
+- `host`: the instance hostname for `gitlab` / `gitea` (e.g. `git.example.com`) — leave empty for `github`
+- `report_language`: the language reports are written in (e.g. `English`, `Turkish`, `tr`) — defaults to `English`
+- `repos`: the repos you want to monitor (`owner`/`name`/`alias` — for GitLab, `owner` is the group/namespace)
 - `recipients`: who gets what kind of report (scope: `all_projects`, `own_commits`, or `summary_only`)
 
-## Step 3: Set up Discord webhooks
+For `own_commits` recipients, add the provider's identity key: `github_username`,
+`gitea_username`, or — for GitLab — `email` (GitLab matches commit authors by email).
+
+## Step 3: Set up authentication
+
+### GitHub
+
+Authenticate the `gh` CLI once: `gh auth login`. No token goes in `.env`.
+
+### GitLab
+
+Create a Personal Access Token at
+`https://<your-gitlab-host>/-/user_settings/personal_access_tokens` with the
+`read_api` and `read_repository` scopes.
+
+### Gitea
+
+Create an access token at `https://<your-gitea-host>/user/settings/applications`
+with read-only repository access.
+
+## Step 4: Set up Discord webhooks and `.env`
 
 In Discord: Server Settings → Integrations → Webhooks → New Webhook.
 Select the target channel, copy the URL.
@@ -49,13 +76,22 @@ cp .env.example .env
 $EDITOR .env
 ```
 
-Fill in the webhook URLs. **Never commit `.env`** — it's already in `.gitignore`.
+Fill in the webhook URLs, and — for GitLab/Gitea — the `GITLAB_TOKEN` or `GITEA_TOKEN`.
+**Never commit `.env`** — it's already in `.gitignore`.
 
-## Step 4: Tell your team
+> **macOS:** Finder hides dotfiles like `.env` by default. Toggle visibility with
+> `Cmd + Shift + .`, or just open it directly with `code .env` / `open -e .env`.
 
-Before running DailyForge against any repo, inform every developer whose commits will be processed. Send a written notice covering what the tool reads, where reports go, which third parties are involved, and how to raise concerns. See the "Ethical Framework" section of [`README.md`](README.md) for the required minimum and [`SECURITY.md`](SECURITY.md) for operator obligations under KVKK / GDPR. **Do not skip this step** — it's the ethical and legal foundation of the tool.
+## Step 5: Tell your team
 
-## Step 5: Run it
+Before running DailyForge against any repo, inform every developer whose commits will be
+processed. Send a written notice covering what the tool reads, where reports go, which
+third parties are involved, and how to raise concerns. See the "Ethical Framework"
+section of [`README.md`](README.md) for the required minimum and [`SECURITY.md`](SECURITY.md)
+for operator obligations under KVKK / GDPR. **Do not skip this step** — it's the ethical
+and legal foundation of the tool.
+
+## Step 6: Run it
 
 ```bash
 cd /path/to/dailyforge
@@ -76,7 +112,13 @@ Claude prints each report to the chat. If the output looks right, run the real t
 /dailyforge
 ```
 
-Claude will run prerequisite checks, then:
+To preview in a different language without touching `config.json`, pass `--lang`:
+
+```
+/dailyforge --dry-run --lang tr
+```
+
+Claude will run prerequisite checks and a preflight `doctor` pass, then:
 1. Fetch last 24h commits from each repo
 2. Classify Unity files
 3. Generate a tailored report for each recipient
@@ -85,16 +127,35 @@ Claude will run prerequisite checks, then:
 
 Check the Discord channels — verify the messages arrived and the format looks right.
 
+## Minimal smoke test
+
+The example config ships three recipients with three different scopes. To get your
+first green run fast, trim it down:
+
+> One repo, one recipient with `scope: "all_projects"`, one webhook. Set `provider` and
+> `host`, fill in a single `DISCORD_WEBHOOK_*` in `.env`, and run `/dailyforge --dry-run`.
+
+Once that works end-to-end, add the rest of your repos and recipients.
+
 ## Daily usage
 
 Open Claude Code, type `/dailyforge`. The report takes about 30-60 seconds.
 
 ## Troubleshooting
 
-**`gh authentication failed`**
+**`gh authentication failed`** (GitHub)
 ```bash
 gh auth login
 ```
+
+**GitLab/Gitea returns `401` or `403`**
+The token is invalid or missing scopes. Regenerate it — GitLab needs `read_api` +
+`read_repository`, Gitea needs read-only repository access. Confirm `GITLAB_TOKEN` /
+`GITEA_TOKEN` is set in `.env` and `host` in `config.json` is correct.
+
+**GitLab/Gitea returns `404` on a repo**
+The repo/project path is wrong, or the token can't see it. For GitLab, `owner` must be
+the full group/namespace. DailyForge skips an unreachable repo and continues with the rest.
 
 **`config.json not found`**
 Make sure you're in the `dailyforge` directory when running Claude Code. The skill uses `pwd` to find the config.
@@ -115,7 +176,7 @@ You're in PowerShell. Open Git Bash or a WSL terminal and re-run Claude Code fro
 If there really are no commits in the lookback window, that's the correct output. Try bumping `lookback_hours` to test the pipeline.
 
 **Report too long, Discord cut it off**
-Known v0.1 limitation. v0.2 will split into per-project embeds.
+v0.2 splits long reports into per-project embeds. If you still see truncation, check that the report isn't a single project over 4096 chars.
 
 ## Next steps
 

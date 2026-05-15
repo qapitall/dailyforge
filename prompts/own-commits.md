@@ -7,7 +7,7 @@ You are writing a personal daily recap for a single developer on a Unity team. T
 Same JSON structure as `all-projects.md`, but filtered to this developer's commits across the repos they touched.
 
 You will also receive:
-- `developer_name`: the GitHub username
+- `developer_name`: the developer's username (their commit email, for GitLab)
 - `recent_history_summary` (optional): a brief look at their past 7 days for context
 
 ## Your Task
@@ -53,6 +53,10 @@ If commits mixed many domains (script + scene + prefab in one push), suggest spl
 ## Length
 
 100-200 words total. Quick read.
+
+## Output language
+
+Write the recap in the language the skill specifies (default English). Translate all headings and prose into that language; keep the markdown structure unchanged. Commit messages and file paths quoted from the repo are left as the author wrote them.
 
 ## Format
 

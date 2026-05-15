@@ -1,6 +1,9 @@
 {
   "version": 1,
+  "provider": "github",
+  "host": "",
   "lookback_hours": 24,
+  "report_language": "English",
   "ignore_authors": [
     "dependabot[bot]",
     "github-actions[bot]",
