@@ -3,11 +3,11 @@
 > A Claude Code–powered, multi-project daily standup reporter for Unity teams.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Status](https://img.shields.io/badge/status-v0.1-green.svg)
+![Status](https://img.shields.io/badge/status-v0.2-green.svg)
 ![Built with Claude Code](https://img.shields.io/badge/built%20with-Claude%20Code-orange.svg)
 ![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)
 
-**Status:** v0.1 shipped (GitHub). v0.2 adds GitLab and Gitea support — see the [roadmap](docs/ROADMAP.md).
+**Status:** v0.2 shipped — GitHub, GitLab, and Gitea support. See the [roadmap](docs/ROADMAP.md) for what's next.
 
 See [`QUICKSTART.md`](QUICKSTART.md) to get running in 5 minutes, or [`docs/example-output.md`](docs/example-output.md) for sample reports.
 

@@ -21,13 +21,13 @@ The Claude Code skill that started the project. Status: shipped.
 - English output only
 - No persistent state — each run is independent
 
-## v0.2 — Multi-provider support (current)
+## v0.2 — Multi-provider support
 
 DailyForge originally assumed GitHub + the `gh` CLI. Many Unity teams run their code on a
 self-hosted **GitLab** or **Gitea** instance. v0.2 makes the provider a config choice
-without changing the rest of the pipeline.
+without changing the rest of the pipeline. Status: shipped.
 
-**Planned:**
+**Included:**
 - `provider` field in `config.json` — `github`, `gitlab`, or `gitea`
 - GitLab REST API v4 backend (PAT auth, URL-encoded project paths, paginated diff endpoint)
 - Gitea REST API v1 backend (token auth, GitHub-shaped responses)

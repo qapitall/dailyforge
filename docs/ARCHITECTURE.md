@@ -46,7 +46,7 @@ Instead of the traditional CLI-first approach, the primary distribution is Claud
 
 The downside is that DailyForge requires a human in the loop — it runs when the user types `/dailyforge`.
 
-## v0.2 — Multi-provider (planned)
+## v0.2 — Multi-provider
 
 v0.2 keeps the exact same skill mode and adds a provider adapter so the backend is a
 config choice. The `provider` field in `config.json` selects one of three code paths;

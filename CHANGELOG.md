@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-05-15
+
 ### Added
 - Multi-provider support — `provider` field in `config.json` selects `github`, `gitlab`, or `gitea`
 - GitLab REST API v4 backend: PAT auth (`GITLAB_TOKEN`), URL-encoded project paths, `X-Next-Page` pagination
@@ -61,5 +63,6 @@ Initial public release. Skill-mode only — CLI mode is planned for v0.2.
 - No standalone CLI yet — requires an interactive Claude Code session
 - No persistent state — each run is independent
 
-[Unreleased]: https://github.com/qapitall/dailyforge/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/qapitall/dailyforge/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/qapitall/dailyforge/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/qapitall/dailyforge/releases/tag/v0.1.0

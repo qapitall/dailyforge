@@ -25,6 +25,7 @@ You will receive an acknowledgement within **72 hours**. If a fix is needed, exp
 
 | Version | Supported |
 | --- | --- |
+| 0.2.x   | Yes |
 | 0.1.x   | Yes |
 | < 0.1   | No  |
 
